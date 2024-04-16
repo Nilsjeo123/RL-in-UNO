@@ -1,6 +1,6 @@
 import os
 import argparse
-
+import time
 import torch
 
 import rlcard
@@ -15,9 +15,16 @@ from rlcard.utils import (
 )
 
 def train(args):
-
+    tic = time.perf_counter()
     # Check whether gpu is available
-    device = get_device()
+    import torch
+    # device = get_device()
+    if torch.cuda.is_available() and args.cuda != '':
+        device = torch.device("cuda:0")
+        print("--> Running on the GPU")
+    else:
+        device = torch.device("cpu")
+        print("--> Running on the CPU")
 
     # Seed numpy, torch, random
     set_seed(args.seed)
@@ -55,7 +62,7 @@ def train(args):
 
     # Start training
     with Logger(args.log_dir) as logger:
-        for episode in range(args.num_episodes):
+        for episode in range(args.num_episodes+1):
 
             if args.algorithm == 'nfsp':
                 agents[0].sample_episode_policy()
@@ -88,17 +95,22 @@ def train(args):
     # Plot the learning curve
     plot_curve(csv_path, fig_path, args.algorithm)
 
+    toc = time.perf_counter()
+
     # Save model
     save_path = os.path.join(args.log_dir, 'model.pth')
     torch.save(agent, save_path)
     print('Model saved in', save_path)
+
+    print(f"Training finished in {(toc - tic)/60:0.0f} minutes {(toc - tic)%60:0.2f} seconds")
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser("DQN/NFSP example in RLCard")
     parser.add_argument(
         '--env',
         type=str,
-        default='leduc-holdem',
+        default='uno',
         choices=[
             'blackjack',
             'leduc-holdem',
@@ -107,7 +119,7 @@ if __name__ == '__main__':
             'mahjong',
             'no-limit-holdem',
             'uno',
-            'gin-rummy',
+            'gin-rummy', 
             'bridge',
         ],
     )
@@ -148,7 +160,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--log_dir',
         type=str,
-        default='experiments/leduc_holdem_dqn_result/',
+        default='experiments/uno_dqn_result/',
     )
 
     args = parser.parse_args()
