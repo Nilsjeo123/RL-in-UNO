@@ -19,7 +19,7 @@ def train(args):
     # Check whether gpu is available
     import torch
     # device = get_device()
-    if torch.cuda.is_available() and args.cuda != '':
+    if torch.cuda.is_available():
         device = torch.device("cuda:0")
         print("--> Running on the GPU")
     else:
