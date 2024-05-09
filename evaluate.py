@@ -13,6 +13,7 @@ from rlcard.utils import (
 )
 
 def load_model(model_path, env=None, position=None, device=None):
+    agent = None
     if os.path.isfile(model_path):  # Torch model
         import torch
         agent = torch.load(model_path, map_location=device)
@@ -26,7 +27,7 @@ def load_model(model_path, env=None, position=None, device=None):
         agent = RandomAgent(num_actions=env.num_actions)
     else:  # A model in the model zoo
         from rlcard import models
-        agent = models.load(model_path).agents[position]
+        agent = models.load(model_path).agents[0]
 
     return agent
 
@@ -80,8 +81,16 @@ if __name__ == '__main__':
         '--models',
         nargs='*',
         default=[
-            'trained_models/uno_dqn_50000_result/model.pth',
-            'uno-rule-v1',
+            'random',
+            'random',
+            #'trained_models/uno_dqn_50000_result/model.pth',
+            #'trained_models/uno_dqn_100000_cuda_result/model.pth',
+            #'trained_models/uno_dqn_500000_cuda_result/model.pth',
+            #'trained_models/uno_nfsp_50000_result/model.pth',
+            #'trained_models/uno_nfsp_100000_cuda_result/model.pth',
+            #'trained_models/uno_nfsp_500000_cuda_result/model.pth',
+            #'trained_models/uno_dmc_cuda_result/1_151574400.pth',
+            #'uno-rule-v1',
         ],
     )
     parser.add_argument(
